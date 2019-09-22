@@ -1,293 +1,113 @@
-object garlic{
-	var idDestino;
-	var nombre;
-	var equipaje = [];
-	var precio;
+object garlicSea{
+	const property nombre = "Garlic's Sea"
+	var property equipajeImprescindible = ["Caña de Pescar", "Piloto"]
+	var property precio = 2500
+}
+
+object silverSea{
+	const property nombre = "Silver's Sea"
+	var property equipajeImprescindible = ["Protector Solar", "Equipo de Buceo"]
+	var property precio = 1350
+}
+
+object lastToninas{
+	const property nombre = "Last Toninas"
+	var property equipajeImprescindible = ["Vacuna Gripal", "Vacuna B", "Necronomicon"]
+	var property precio = 3500
+}
+
+object goodAirs{
+	const property nombre = "Good Airs"
+	var property equipajeImprescindible = ["Cerveza", "Protector Solar"]
+	var property precio = 1500
+}
+
+object barrileteCosmico{
+	var cantidadMinimaDestinoImportante = 2000
+	var property destinos = [garlicSea, silverSea, lastToninas, goodAirs]
 	
-	method getNombre()
-	{
-		return nombre;
+	method destinosMasImportantes(){
+		var lista_destinos = destinos.filter {x => x.precio() >= cantidadMinimaDestinoImportante}
+		return self.getDestinosPorNombre(lista_destinos)
 	}
-	method setNombre(p_nombre)
-	{
-		nombre = p_nombre;
+	
+	method aplicarDescuento(cantDescuento, unDestino){
+		var destino = self.getDestinoPorNombre(unDestino)
+		var nuevo_precio = self.calcularDescuento(destino.precio(), cantDescuento) 
+		destino.precio(nuevo_precio)
+		destino.equipajeImprescindible().add("Certificado de descuento")
 	}
-	method getEquipaje()
-	{
-		return equipaje;
+	
+	method esEmpresaExtrema(){
+		var listaDestinos = self.destinosMasImportantes()
+		return listaDestinos.any {destino => self.destinoTieneVacuna(destino)}
 	}
-	method setEquipaje(p_equipaje)
-	{
-		equipaje.add(p_equipaje);
+	
+		
+	method destinoTieneVacuna(destino){
+		return destino.equipajeImprescindible().any {equipaje => equipaje.contains('Vacuna')}
 	}
-	method getPrecio()
-	{
-		return precio;
+	
+	method calcularDescuento(precio, cantDescuento){
+		const formula = {precio_original, cant_descuento => precio_original - (precio_original * (cant_descuento / 100))}
+		return formula.apply(precio, cantDescuento)
 	}
-	method setPrecio(p_precio)
-	{
-		precio = p_precio;
+	
+	method mostrarCartaDestinos(){
+		return self.getDestinosPorNombre(destinos)
 	}
-	method obtenerPrecio()
-	{
-		return precio;
+	
+	method getDestinoPorNombre(destino){
+		return destinos.find {x => x.nombre() == destino}
 	}
-	method cargarDatos()
-	{
-		idDestino = 1;
-		nombre = "Garlic´s Sea";
-		equipaje.add('Caña de Pescar');
-		equipaje.add('Piloto');
-		precio = 2500;
+	
+	method getDestinosPorNombre(listaDestinos){
+		return listaDestinos.map {x => x.nombre()}
 	}
 	
 }
 
-
-///////////////////////////////////////////////////////////////////////
-
-
-object silver{
-	var idDestino;
-	var nombre;
-	var equipaje = [];
-	var precio;
+object pHari {
+	const property nombre = "Pablo Hari"
+	var empresa = barrileteCosmico
+	var property destinosConocidos = ["Last Toninas", "Good Airs"]
+	var property balanceEnCuenta = 1500
+	var property siguiendo = []
 	
-	method getNombre()
-	{
-		return nombre;
-	}
-	method setNombre(p_nombre)
-	{
-		nombre = p_nombre;
-	}
-	method getEquipaje()
-	{
-		return equipaje;
-	}
-	method setEquipaje(p_equipaje)
-	{
-		equipaje.add(p_equipaje);
-	}
-	method getPrecio()
-	{
-		return precio;
-	}
-	method setPrecio(p_precio)
-	{
-		precio = p_precio;
-	}
-	method obtenerPrecio()
-	{
-		return precio;
-	}
-
-		method cargarDatos()
-	{
-		idDestino = 2;
-		nombre = "Silver's Sea";
-		equipaje.add('Protector Solar');
-		equipaje.add('Equipo de Buceo');
-		precio = 1350;
+	method volarDestino(nombreDestino){
+		var mensaje = ""
+		var destino = empresa.getDestinoPorNombre(nombreDestino) 
+		if (self.puedeVolarDestino(destino)){
+			balanceEnCuenta -= destino.precio()
+			self.agregarDestino(nombreDestino)
+			mensaje = "Pudo viajar Correctamente"
+		}else{
+			mensaje = "No cuenta con el saldo suficiente para viajar. Tiene " + balanceEnCuenta + " $ y necesita " + destino.precio() + " $"
+		}
+		return mensaje
 	}
 	
-}
-
-
-///////////////////////////////////////////////////////////////////////
-
-
-object last{
-	var idDestino;
-	var nombre;
-	var equipaje = [];
-	var precio;
-	
-	method getNombre()
-	{
-		return nombre;
-	}
-	method setNombre(p_nombre)
-	{
-		nombre = p_nombre;
-	}
-	method getEquipaje()
-	{
-		return equipaje;
-	}
-	method setEquipaje(p_equipaje)
-	{
-		equipaje.add(p_equipaje);
-	}
-	method getPrecio()
-	{
-		return precio;
-	}
-	method setPrecio(p_precio)
-	{
-		precio = p_precio;
-	}
-		method obtenerPrecio()
-	{
-		return precio;
-	}
-
-		method cargarDatos()
-	{
-		idDestino = 3;
-		nombre = "Last Toninas";
-		equipaje.add('Vacuna Gripa');
-		equipaje.add('Vacuna B');
-		equipaje.add('Necronomicon');
-		precio = 3500;
+	method puedeVolarDestino(destino){
+		return balanceEnCuenta >= destino.precio()		
 	}
 	
-}
-
-///////////////////////////////////////////////////////////////////////
-
-object good{
-	var idDestino;
-	var nombre;
-	var equipaje = [];
-	var precio;
-	
-	method getNombre()
-	{
-		return nombre;
-	}
-	method setNombre(p_nombre)
-	{
-		nombre = p_nombre;
-	}
-	method getEquipaje()
-	{
-		return equipaje;
-	}
-	method setEquipaje(p_equipaje)
-	{
-		equipaje.add(p_equipaje);
-	}
-	method getPrecio()
-	{
-		return precio;
-	}
-	method setPrecio(p_precio)
-	{
-		precio = p_precio;
-	}
-	method obtenerPrecio()
-	{
-		return precio;
-	}
-
-		method cargarDatos()
-	{
-		idDestino = 4;
-		nombre = "Good Airs";
-		equipaje.add('Cerveza');
-		equipaje.add('Protector Solar');
-		precio = 1500;
+	method agregarDestino(nombreDestino){
+		destinosConocidos.add(nombreDestino)
 	}
 	
-}
-
-
-object pablo{
-	var idUsuario;
-	var nombre;
-	var historialViajes = [];
-	var totalCuenta;
-	var seguidos = [];
-	var promedioKm;
-	
-	method getNombre()
-	{
-		return nombre;
-	}
-	method setNombre(p_nombre)
-	{
-		nombre = p_nombre;
-	}
-	method getHistorialViajes()
-	{
-		return historialViajes;
-	}
-	method setHistorialViajes(p_destino)
-	{
-		historialViajes.add(p_destino);
-	}
-	method getTotalCuenta()
-	{
-		return totalCuenta;
-	}
-	method setTotalCuenta(p_total)
-	{
-		totalCuenta = p_total;
-	}
-	method obtenerTotalCuenta()
-	{
-		return totalCuenta;
-	}
-	method getSeguidos()
-	{
-		return seguidos;
-	}
-	method setSeguidos(p_seguir)
-	{
-		seguidos.add(p_seguir);
-	}
-	method puedePagar(p_destino)
-	{
-		return (totalCuenta > p_destino.obtenerPrecio());
-	}
-	method volar(p_destino) 
-	{
-		totalCuenta = totalCuenta - (p_destino.obtenerPrecio());
-		self.setHistorialViajes(p_destino);
+	method getKilometrosRecorridos(){
+		return (self.getMontoTotalRecorrido() * 10) / 100
 	}
 	
-	
-	method cargarDatos()
-	{
-		idUsuario = 1;
-		nombre = "PHari";
-		historialViajes.add(last);
-		historialViajes.add(good);
-		totalCuenta = 1500;
-	}
-	method obtenerPromedioKm()
-	{
-		promedioKm = 0;
-		promedioKm = (historialViajes.sum({precios => precios.obtenerPrecio()}))*0.1;
-		return promedioKm;
-	}
-	method seguir(p_usuario)
-	{
-		seguidos.add(p_usuario);
-		p_usuario.getHistorialViajes();
-	}
-
-	
-}
-
-object sistema
-{	
-	var list_destinos  = [];
-	var list_usuarios = [];
-	
-	method cargarDestinos()
-	{
-		list_destinos.add(garlic);
-		list_destinos.add(silver);
-		list_destinos.add(last);
-		list_destinos.add(good);
+	method getMontoTotalRecorrido(){
+		var lista_precios = []
+		destinosConocidos.forEach {nombreDestino => lista_precios.add(empresa.getDestinoPorNombre(nombreDestino).precio())}
+		return lista_precios.sum()
 	}
 	
-	method cargarUsuarios()
-	{
-		list_usuarios.add(pablo);
+	method seguirUsuario(usuario){
+		siguiendo.add(usuario.nombre())
+		usuario.siguiendo().add(self.nombre())
 	}
 	
-
 }
