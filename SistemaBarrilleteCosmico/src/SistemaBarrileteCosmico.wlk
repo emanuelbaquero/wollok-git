@@ -35,9 +35,13 @@ object garlic{
 	method aplicarDescuento(p_descuento)
 	{
 		precio = precio - (precio*(p_descuento/100));
+		equipaje.add('Certificado de descuento');
 		return precio;
 	}
-	
+	method esExtrema()
+	{
+		return equipaje.filter({equipajeExtremo => equipajeExtremo.contains('Vacuna')});
+	}
 	
 	method cargarDatos()
 	{
@@ -91,9 +95,13 @@ object silver{
 	method aplicarDescuento(p_descuento)
 	{
 		precio = precio - (precio*(p_descuento/100));
+		equipaje.add('Certificado de descuento');
 		return precio;
 	}
-
+	method esExtrema()
+	{
+		return equipaje.filter({equipajeExtremo => equipajeExtremo.contains('Vacuna')});
+	}
 		method cargarDatos()
 	{
 		idDestino = 2;
@@ -146,7 +154,12 @@ object last{
 	method aplicarDescuento(p_descuento)
 	{
 		precio = precio - (precio*(p_descuento/100));
+		equipaje.add('Certificado de descuento');
 		return precio;
+	}
+	method esExtrema()
+	{
+		return equipaje.filter({equipajeExtremo => equipajeExtremo.contains('Vacuna')});
 	}
 		method cargarDatos()
 	{
@@ -199,7 +212,12 @@ object good{
 	method aplicarDescuento(p_descuento)
 	{
 		precio = precio - (precio*(p_descuento/100));
+		equipaje.add('Certificado de descuento');
 		return precio;
+	}
+	method esExtrema()
+	{
+		return equipaje.filter({equipajeExtremo => equipajeExtremo.contains('Vacuna')});
 	}
 		method cargarDatos()
 	{
@@ -212,6 +230,7 @@ object good{
 	
 }
 
+//////////////////////////////////////////////////////////////////
 
 object pablo{
 	var idUsuario;
@@ -275,7 +294,7 @@ object pablo{
 		}
 	
 	
-	method cargarDatos()
+method cargarDatos()
 	{
 		idUsuario = 1;
 		nombre = "PHari";
@@ -294,9 +313,9 @@ object pablo{
 		seguidos.add(p_usuario);
 		p_usuario.getHistorialViajes();
 	}
-
-	
 }
+
+////////////////////////////////////////////////////////////////
 
 object sistema
 {	
@@ -335,8 +354,17 @@ object sistema
 	
 	method aplicarDescuentos(descuento)
 	{
-		return list_destinos.map({list_destinos_descuentos => list_destinos_descuentos.aplicarDescuento(descuento)});
+		return list_destinos.map({list_destinos_con_descuentos => list_destinos_con_descuentos.aplicarDescuento(descuento)});
 	}
 	
-
+	method esExtrema() {
+	return list_destinos.any({destino => destino.esExtrema().size()>0});
+	}
+	
+	method carta()
+	{
+		return list_destinos.map({carta_destinos => carta_destinos.getNombre()});
+	}
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////
