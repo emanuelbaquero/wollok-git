@@ -244,6 +244,7 @@ object pablo{
 	method volar(p_destino) 
 	{
 		totalCuenta = totalCuenta - (p_destino.obtenerPrecio());
+		self.setHistorialViajes(p_destino);
 	}
 	
 	
