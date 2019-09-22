@@ -32,6 +32,13 @@ object garlic{
 	{
 		return precio;
 	}
+	method aplicarDescuento(p_descuento)
+	{
+		precio = precio - (precio*(p_descuento/100));
+		return precio;
+	}
+	
+	
 	method cargarDatos()
 	{
 		idDestino = 1;
@@ -79,6 +86,11 @@ object silver{
 	}
 	method obtenerPrecio()
 	{
+		return precio;
+	}
+	method aplicarDescuento(p_descuento)
+	{
+		precio = precio - (precio*(p_descuento/100));
 		return precio;
 	}
 
@@ -131,7 +143,11 @@ object last{
 	{
 		return precio;
 	}
-
+	method aplicarDescuento(p_descuento)
+	{
+		precio = precio - (precio*(p_descuento/100));
+		return precio;
+	}
 		method cargarDatos()
 	{
 		idDestino = 3;
@@ -180,7 +196,11 @@ object good{
 	{
 		return precio;
 	}
-
+	method aplicarDescuento(p_descuento)
+	{
+		precio = precio - (precio*(p_descuento/100));
+		return precio;
+	}
 		method cargarDatos()
 	{
 		idDestino = 4;
@@ -223,7 +243,7 @@ object pablo{
 	}
 	method setTotalCuenta(p_total)
 	{
-		totalCuenta = p_total;
+		totalCuenta = totalCuenta + p_total;
 	}
 	method obtenerTotalCuenta()
 	{
@@ -241,11 +261,18 @@ object pablo{
 	{
 		return (totalCuenta > p_destino.obtenerPrecio());
 	}
-	method volar(p_destino) 
-	{
-		totalCuenta = totalCuenta - (p_destino.obtenerPrecio());
-		self.setHistorialViajes(p_destino);
-	}
+	method volar(p_destino) = 
+	
+		if (self.puedePagar(p_destino)) 	
+		{
+			totalCuenta = totalCuenta - (p_destino.obtenerPrecio());
+			self.setHistorialViajes(p_destino);
+			return "El Usuario Ha registrado Correctamente el Viaje";
+		}
+		else
+		{
+			return "El Usuario No Cuenta Con Saldo Suficiente";
+		}
 	
 	
 	method cargarDatos()
@@ -278,6 +305,11 @@ object sistema
 	
 	method cargarDestinos()
 	{
+		garlic.cargarDatos();
+		silver.cargarDatos();
+		last.cargarDatos();
+		good.cargarDatos();
+
 		list_destinos.add(garlic);
 		list_destinos.add(silver);
 		list_destinos.add(last);
@@ -286,7 +318,24 @@ object sistema
 	
 	method cargarUsuarios()
 	{
+		pablo.cargarDatos();
 		list_usuarios.add(pablo);
+	}
+	
+	method cargarDatos()
+	{
+		self.cargarDestinos();
+		self.cargarUsuarios();
+	}
+	
+	method obtenerDestinosImportantes()
+	{
+		return list_destinos.filter({destinosImportantes => destinosImportantes.getPrecio() > 2000});	
+	}
+	
+	method aplicarDescuentos(descuento)
+	{
+		return list_destinos.map({list_destinos_descuentos => list_destinos_descuentos.aplicarDescuento(descuento)});
 	}
 	
 

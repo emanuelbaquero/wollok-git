@@ -1,0 +1,28 @@
+DESTINOS
+
+garlic 
+nombre = 'Garlic´s Sea'
+equipaje = {'Caña de Pescar','Piloto'}
+precio = 2500
+
+silver
+nombre = 'Silver's Sea'
+equipaje = {'Protector Solar','Equipo de Buceo'}
+precio = 1350
+
+last
+nombre = 'Last Toninas'
+equipaje = {'Vacuna Gripa','Vacuna B', 'Necronomicon'}
+precio = 3500
+
+good
+nombre = 'Good Airs'
+equipaje = {'Cerveza', 'Protector Solar'}
+precio = 1500
+
+USUARIOS
+
+nombre = 'PHari'
+historialViajes = Last Toninas, Good Airs
+totalCuenta = 1500
+seguidos = null
