@@ -27,8 +27,7 @@ object barrileteCosmico{
 	var property destinos = [garlicSea, silverSea, lastToninas, goodAirs]
 	
 	method destinosMasImportantes(){
-		var lista_destinos = destinos.filter {x => x.precio() >= cantidadMinimaDestinoImportante}
-		return self.getDestinosPorNombre(lista_destinos)
+		return destinos.filter {x => x.precio() >= cantidadMinimaDestinoImportante}
 	}
 	
 	method aplicarDescuento(cantDescuento, unDestino){
@@ -43,7 +42,10 @@ object barrileteCosmico{
 		return listaDestinos.any {destino => self.destinoTieneVacuna(destino)}
 	}
 	
-		
+	method esDestinoExtremo(destino){ // peligroso == extremo
+		return self.destinoTieneVacuna(destino)
+	}
+	
 	method destinoTieneVacuna(destino){
 		return destino.equipajeImprescindible().any {equipaje => equipaje.contains('Vacuna')}
 	}
@@ -54,21 +56,18 @@ object barrileteCosmico{
 	}
 	
 	method mostrarCartaDestinos(){
-		return self.getDestinosPorNombre(destinos)
+		return destinos.map {destino => destino.nombre()}
 	}
 	
 	method getDestinoPorNombre(destino){
 		return destinos.find {x => x.nombre() == destino}
 	}
 	
-	method getDestinosPorNombre(listaDestinos){
-		return listaDestinos.map {x => x.nombre()}
-	}
-	
 }
 
 object pHari {
 	const property nombre = "Pablo Hari"
+	const porcentajeKilometraje = 10
 	var empresa = barrileteCosmico
 	var property destinosConocidos = ["Last Toninas", "Good Airs"]
 	var property balanceEnCuenta = 1500
@@ -96,7 +95,7 @@ object pHari {
 	}
 	
 	method getKilometrosRecorridos(){
-		return (self.getMontoTotalRecorrido() * 10) / 100
+		return (self.getMontoTotalRecorrido() * porcentajeKilometraje) / 100
 	}
 	
 	method getMontoTotalRecorrido(){
@@ -106,8 +105,14 @@ object pHari {
 	}
 	
 	method seguirUsuario(usuario){
-		siguiendo.add(usuario.nombre())
-		usuario.siguiendo().add(self.nombre())
+		siguiendo.add(usuario)
+		usuario.siguiendo().add(self)
 	}
 	
+	method siguiendo(){
+		// en lugar de retornar la lista entera, retorno los nombres para que sea un print mas amigable
+		// posiblemente haya que cambiarlo en una instancia futura
+		return siguiendo.map {seguidor => seguidor.nombre()}
+	}
 }
+

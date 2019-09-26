@@ -1,0 +1,21 @@
+import SistemaBarrileteCosmico.*
+
+describe "Tests de SistemaBarrileteCosmico" {
+	
+	test "Destinos mas importantes" {
+		const lista_esperada = ["Garlic's Sea", "Last Toninas"]
+		var lista_obtenida = barrileteCosmico.destinosMasImportantes()
+		assert.that(lista_esperada == lista_obtenida)
+	}
+
+	test "Aplicar descuento a Last Toninas"{
+		const porcentaje_descuento = 10
+		const precio_esperado = 2625 //quizas deberia calcularlo a manopla en vez de hardcodearlo :thinking:
+		const equipaje_esperado = "Certificado de descuento"
+		
+		barrileteCosmico.aplicarDescuento(porcentaje_descuento, "Last Toninas")
+		assert.that(lastToninas.precio() == precio_esperado)
+		assert.that(lastToninas.equipajeImprescindible().any {equipaje => equipaje == equipaje_esperado})
+	}
+
+}
