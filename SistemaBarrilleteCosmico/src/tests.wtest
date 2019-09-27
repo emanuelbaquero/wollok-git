@@ -57,10 +57,10 @@ describe "Tests de SistemaBarrileteCosmico" {
 	
 	test"La carta es Last Toninas, Garlic´s sea, Good Airs y Silver's Sea"{
 		var lista_obtenida = barrileteCosmico.mostrarCartaDestinos()
-		assert.that(lista_obtenida.any{equipaje => equipaje.contains("Silver's Sea")})
-		assert.that(lista_obtenida.any{equipaje => equipaje.contains("Good Airs")})
-		assert.that(lista_obtenida.any{equipaje => equipaje.contains("Garlic's Sea")})
-		assert.that(lista_obtenida.any{equipaje => equipaje.contains("Last Toninas")})
+		assert.that(lista_obtenida.any{destino => destino.contains("Silver's Sea")})
+		assert.that(lista_obtenida.any{destino => destino.contains("Good Airs")})
+		assert.that(lista_obtenida.any{destino => destino.contains("Garlic's Sea")})
+		assert.that(lista_obtenida.any{destino => destino.contains("Last Toninas")})
 	}
 	
 	test"PHari tiene 500 km"{
