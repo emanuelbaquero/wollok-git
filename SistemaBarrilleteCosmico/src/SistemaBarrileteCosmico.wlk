@@ -2,24 +2,56 @@ object garlicSea{
 	const property nombre = "Garlic's Sea"
 	var property equipajeImprescindible = ["Caña de Pescar", "Piloto"]
 	var property precio = 2500
+	
+	
+	method aplicarDescuento(p_descuento)
+	{
+		precio = precio - (precio*(p_descuento/100))
+		equipajeImprescindible.add('Certificado de descuento')
+		return precio
+	}
 }
 
 object silverSea{
 	const property nombre = "Silver's Sea"
 	var property equipajeImprescindible = ["Protector Solar", "Equipo de Buceo"]
 	var property precio = 1350
+	
+	
+	
+	method aplicarDescuento(p_descuento)
+	{
+		precio = precio - (precio*(p_descuento/100))
+		equipajeImprescindible.add('Certificado de descuento')
+		return precio
+	}
 }
 
 object lastToninas{
 	const property nombre = "Last Toninas"
 	var property equipajeImprescindible = ["Vacuna Gripal", "Vacuna B", "Necronomicon"]
 	var property precio = 3500
+	
+	method aplicarDescuento(p_descuento)
+	{
+		precio = precio - (precio*(p_descuento/100))
+		equipajeImprescindible.add('Certificado de descuento')
+		return precio
+	}
 }
 
 object goodAirs{
 	const property nombre = "Good Airs"
 	var property equipajeImprescindible = ["Cerveza", "Protector Solar"]
 	var property precio = 1500
+	
+	
+	method aplicarDescuento(p_descuento)
+	{
+		precio = precio - (precio*(p_descuento/100))
+		equipajeImprescindible.add('Certificado de descuento')
+		return precio
+	}
 }
 
 object barrileteCosmico{
@@ -35,6 +67,12 @@ object barrileteCosmico{
 		var nuevo_precio = self.calcularDescuento(destino.precio(), cantDescuento) 
 		destino.precio(nuevo_precio)
 		destino.equipajeImprescindible().add("Certificado de descuento")
+		
+	}
+	
+	method aplicarDescuentoDestinos(descuento){
+	    destinos.map({x => x.aplicarDescuento(descuento)})
+	    return "Se han aplicado los descuentos"
 	}
 	
 	method esEmpresaExtrema(){
