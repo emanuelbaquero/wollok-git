@@ -13,8 +13,8 @@ describe "Tests de SistemaBarrileteCosmico" {
 		const malaria = new Infecciosa()
 		malaria.nombre("Malaria")
 		malaria.cantidadCelulas(800)
-		
 		frank.contraerEnfermedad(malaria)
+		
 		assert.that(frank.getNombreEnfermedades().any {enfermedad => enfermedad == nombre_enfermedad_esperada})
 		assert.that(frank.getCantidadCelulasEnfermedades().any {cantidadCelulasEnf => cantidadCelulasEnf == cant_celulas_enfermedad_esperada})
 		

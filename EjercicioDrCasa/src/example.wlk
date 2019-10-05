@@ -1,5 +1,11 @@
-class Infecciosa {
+class Enfermedad {
 	var property cantidadCelulas
+	method atenuar(cantMedicamento){
+		cantidadCelulas -= cantMedicamento * 15
+	}
+}
+
+class Infecciosa inherits Enfermedad{
 	var property nombre
 	var property cantDiasAfectado = 0
 	const porcentaje_celulas = 10
@@ -27,8 +33,7 @@ class Infecciosa {
 	
 }
 
-class AutoInmune {
-	var property cantidadCelulas
+class AutoInmune inherits Enfermedad{
 	var property nombre
 	var property cantDiasAfectado = 0
 	var cantidadDias = 30
@@ -72,5 +77,17 @@ class Persona {
 		}
 		m.apply(enfermedad)
 	}
+	
+	method tomar(cantidad){
+		lista_enfermedades.forEach {enfermedad => enfermedad.atenuar(cantidad)}
+	}
+}
+
+class Medico inherits Persona {
+	
+	override method contraerEnfermedad(enfermedad){
+		super(enfermedad)
+		self.tomar(100)
+	}	
 }
 
