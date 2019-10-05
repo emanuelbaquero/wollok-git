@@ -1,23 +1,24 @@
 import example.*
-
-test "Hacer que Frank contraiga la enfermedad del ítem b." {
-	
-	const nombre_enfermedad_esperada = "Malaria"
-	const cant_celulas_enfermedad_esperada = 800
-	
-	const frank = new Persona()
-	frank.nombre("Frank")
-	frank.temperatura(36)
-	frank.cantidadCelulas(3500000)
-	
-	const malaria = new Infecciosa()
-	malaria.nombre("Malaria")
-	malaria.cantidadCelulas(800)
-	
-	frank.contraerEnfermedad(malaria)
-	assert.that(frank.getNombreEnfermedades().any {enfermedad => enfermedad == nombre_enfermedad_esperada})
-	assert.that(frank.getCantidadCelulasEnfermedades().any {cantidadCelulasEnf => cantidadCelulasEnf == cant_celulas_enfermedad_esperada})
+describe "Tests de SistemaBarrileteCosmico" {
+	test "Hacer que Frank contraiga la enfermedad del ítem b." {
+		
+		const nombre_enfermedad_esperada = "Malaria"
+		const cant_celulas_enfermedad_esperada = 800
+		
+		const frank = new Persona()
+		frank.nombre("Frank")
+		frank.temperatura(36)
+		frank.cantidadCelulas(3500000)
+		
+		const malaria = new Infecciosa()
+		malaria.nombre("Malaria")
+		malaria.cantidadCelulas(800)
+		
+		frank.contraerEnfermedad(malaria)
+		assert.that(frank.getNombreEnfermedades().any {enfermedad => enfermedad == nombre_enfermedad_esperada})
+		assert.that(frank.getCantidadCelulasEnfermedades().any {cantidadCelulasEnf => cantidadCelulasEnf == cant_celulas_enfermedad_esperada})
+		
+	}
 }
-
 
 

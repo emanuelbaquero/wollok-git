@@ -1,14 +1,15 @@
 class Infecciosa {
 	var property cantidadCelulas
 	var property nombre
+	var property cantDiasAfectado = 0
 	const porcentaje_celulas = 10
 	
 	method reproducirse(){
 		cantidadCelulas *= 2
 	}
 	
-	method aumentarTemperatura(persona){
-		var nueva_temp = (persona.temperatura() / 1000) + persona.temperatura()
+	method afectar(persona){
+		var nueva_temp = (cantidadCelulas / 1000) + persona.temperatura()
 		var mensaje
 		if (nueva_temp <= 45) {
 			persona.temperatura(nueva_temp)
@@ -29,13 +30,15 @@ class Infecciosa {
 class AutoInmune {
 	var property cantidadCelulas
 	var property nombre
+	var property cantDiasAfectado = 0
 	var cantidadDias = 30
 	
-	method esAgresiva(persona){
-		return persona.diasAfectado() > cantidadDias
+	
+	method esAgresiva(){
+		return cantDiasAfectado > cantidadDias
 	}
 	
-	method destuirCelulas(persona){
+	method afectar(persona){
 		var nueva_cant = persona.cantidadCelulas() - cantidadCelulas
 		persona.cantidadCelulas(nueva_cant)
 	}
@@ -57,6 +60,17 @@ class Persona {
 	
 	method getCantidadCelulasEnfermedades(){
 		return lista_enfermedades.map {x => x.cantidadCelulas()}
+	}
+	
+	method vivirUnDia(){
+		lista_enfermedades.forEach {enfermedad => self._afectar(enfermedad)}
+	}
+	
+	method _afectar(enfermedad){
+		const m = {
+			enf => enf.afectar(self); enf.cantDiasAfectado(enf.cantDiasAfectado() + 1)
+		}
+		m.apply(enfermedad)
 	}
 }
 
