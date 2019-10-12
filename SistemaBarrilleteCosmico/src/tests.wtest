@@ -3,59 +3,74 @@ import SistemaBarrileteCosmico.*
 describe "Tests de SistemaBarrileteCosmico" {
 	
 	test "Destinos mas importantes" {
-		const lista_esperada = [garlicSea, lastToninas]
+		const garlicSea = testDataGenerator.genGarlicSea()
+		const lastToninas = testDataGenerator.genLastToninas()
+		const barrileteCosmico = testDataGenerator.genBarrileteCosmico()
+		
 		var lista_obtenida = barrileteCosmico.destinosMasImportantes()
-		assert.that(lista_esperada == lista_obtenida)
+		assert.that(lista_obtenida.any {destino => destino.nombre() == garlicSea.nombre()})
+		assert.that(lista_obtenida.any {destino => destino.nombre() == lastToninas.nombre()})
 	}
 
 	test "El descuento del 10% para Last Toninas es de 3150"{
+		const lastToninas = testDataGenerator.genLastToninas()
 		const porcentaje_descuento = 10
 		const precio_esperado = 3150 //quizas deberia calcularlo a manopla en vez de hardcodearlo :thinking:
 		const equipaje_esperado = "Certificado de descuento"
 		
-		barrileteCosmico.aplicarDescuento(porcentaje_descuento, "Last Toninas")
+		lastToninas.aplicarDescuento(porcentaje_descuento)
 		assert.that(lastToninas.precio() == precio_esperado)
 		assert.that(lastToninas.equipajeImprescindible().any {equipaje => equipaje == equipaje_esperado})
 	}
 	
-	test"25% dto para Last Toninas queda en 2.625"{
-		barrileteCosmico.aplicarDescuento(25,"Last Toninas") 
+	test"25% dto para Last Toninas queda en 2.625 y debe tener en el equipaje un certificado de descuento"{
+		const lastToninas = testDataGenerator.genLastToninas()
+		lastToninas.aplicarDescuento(25) 
 		assert.equals(2625,lastToninas.precio())
-	}
-	
-	test"25% dto para Last Toninas Debe Tener en el Equipaje un Certificado de Descuento"{
-		barrileteCosmico.aplicarDescuento(25,"Last Toninas") 
 		assert.that(lastToninas.equipajeImprescindible().any {equipaje => equipaje.contains("Certificado de descuento")})
 	}
 	
+	
 	test"Silver's Sea no es un Destino Peligroso"{
-		assert.notThat(barrileteCosmico.esDestinoExtremo(silverSea))
+		const silverSea = testDataGenerator.genSilverSea()
+		assert.notThat(silverSea.esDestinoPeligroso())
 	}
 	
 	test"15% a todos los Destinos, garlic=2125, silver=1147,5,last=2975,good=1275"{
+		const barrileteCosmico = testDataGenerator.genBarrileteCosmico()
 		barrileteCosmico.aplicarDescuentoDestinos(15)
-		assert.equals(2125,garlicSea.precio())
-		assert.equals(1147.5,silverSea.precio())
-		assert.equals(2975,lastToninas.precio())
-		assert.equals(1275,goodAirs.precio())
-		assert.that(garlicSea.equipajeImprescindible().any {equipaje => equipaje.contains("Certificado de descuento")})
-		assert.that(silverSea.equipajeImprescindible().any {equipaje => equipaje.contains("Certificado de descuento")})
-		assert.that(lastToninas.equipajeImprescindible().any {equipaje => equipaje.contains("Certificado de descuento")})
-		assert.that(goodAirs.equipajeImprescindible().any {equipaje => equipaje.contains("Certificado de descuento")})
+		// Quizas estos const haya que delegarlos en un get precio por nombre o algo similar
+		const precioGarlicSea = barrileteCosmico.getDestinoPorNombre("Garlic's Sea").precio()
+		const precioSilverSea = barrileteCosmico.getDestinoPorNombre("Silver's Sea").precio()
+		const precioLastToninas = barrileteCosmico.getDestinoPorNombre("Last Toninas").precio()
+		const precioGoodAirs = barrileteCosmico.getDestinoPorNombre("Good Airs").precio()
+		assert.equals(2125,precioGarlicSea)
+		assert.equals(1147.5,precioSilverSea)
+		assert.equals(2975,precioLastToninas)
+		assert.equals(1275,precioGoodAirs)
+		assert.that(barrileteCosmico.destinos().all {destino => destino.equipajeImprescindible().contains("Certificado de descuento")})
+
 	}
 	
 	test"El destino mas peligroso es Last Toninas"{
-		assert.notThat(barrileteCosmico.esDestinoExtremo(garlicSea))
-		assert.notThat(barrileteCosmico.esDestinoExtremo(silverSea))
-		assert.that(barrileteCosmico.esDestinoExtremo(lastToninas))
-		assert.notThat(barrileteCosmico.esDestinoExtremo(goodAirs))
+		const garlicSea = testDataGenerator.genGarlicSea()
+		const lastToninas = testDataGenerator.genLastToninas()
+		const silverSea = testDataGenerator.genSilverSea()
+		const goodAirs = testDataGenerator.genGoodAirs()
+		
+		assert.notThat(garlicSea.esDestinoPeligroso())
+		assert.notThat(silverSea.esDestinoPeligroso())
+		assert.notThat(goodAirs.esDestinoPeligroso())
+		assert.that(lastToninas.esDestinoPeligroso())
 	}
 	
 	test "Las empresa Barrilete Cosmico es una empresa extrema"{
+		const barrileteCosmico = testDataGenerator.genBarrileteCosmico()
 		assert.that(barrileteCosmico.esEmpresaExtrema());		
 	}
 	
 	test"La carta es Last Toninas, Garlic´s sea, Good Airs y Silver's Sea"{
+		const barrileteCosmico = testDataGenerator.genBarrileteCosmico()
 		var lista_obtenida = barrileteCosmico.mostrarCartaDestinos()
 		assert.that(lista_obtenida.any{destino => destino.contains("Silver's Sea")})
 		assert.that(lista_obtenida.any{destino => destino.contains("Good Airs")})
@@ -64,15 +79,18 @@ describe "Tests de SistemaBarrileteCosmico" {
 	}
 	
 	test"PHari tiene 500 km"{
+		const pHari = testDataGenerator.genPHari()
 		assert.equals(500,pHari.getKilometrosRecorridos())
 	}
 	
 	test"pHari puede volar a Silver's Sea y es agregado en su historial"{
+		const pHari = testDataGenerator.genPHari()
 		pHari.volarDestino("Silver's Sea")
 		assert.that(pHari.destinosConocidos().any{dConocidos => dConocidos.contains("Silver's Sea")})
 	}
 	
 	test"pHari puede volar a Silver's Sea y en su cuenta le quedaron $150"{
+		const pHari = testDataGenerator.genPHari()
 		pHari.volarDestino("Silver's Sea")
 		assert.that(pHari.destinosConocidos().any{dConocidos => dConocidos.contains("Silver's Sea")})
 		assert.equals(150,pHari.balanceEnCuenta())

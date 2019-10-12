@@ -1,96 +1,40 @@
-object garlicSea{
-	const property nombre = "Garlic's Sea"
-	var property equipajeImprescindible = ["Caña de Pescar", "Piloto"]
-	var property precio = 2500
+class Destino{
+	var property nombre
+	var property equipajeImprescindible = new List()
+	var property precio
 	
-	
-	method aplicarDescuento(p_descuento)
-	{
-		precio = precio - (precio*(p_descuento/100))
-		equipajeImprescindible.add('Certificado de descuento')
-		return precio
+	method esDestinoPeligroso(){
+		return equipajeImprescindible.any {equipaje => equipaje.contains('Vacuna')}
 	}
+	
+	method aplicarDescuento(porcentaje){
+		precio -= precio * (porcentaje / 100)
+		equipajeImprescindible.add('Certificado de descuento')
+	}
+	
 }
 
-object silverSea{
-	const property nombre = "Silver's Sea"
-	var property equipajeImprescindible = ["Protector Solar", "Equipo de Buceo"]
-	var property precio = 1350
-	
-	
-	
-	method aplicarDescuento(p_descuento)
-	{
-		precio = precio - (precio*(p_descuento/100))
-		equipajeImprescindible.add('Certificado de descuento')
-		return precio
-	}
-}
-
-object lastToninas{
-	const property nombre = "Last Toninas"
-	var property equipajeImprescindible = ["Vacuna Gripal", "Vacuna B", "Necronomicon"]
-	var property precio = 3500
-	
-	method aplicarDescuento(p_descuento)
-	{
-		precio = precio - (precio*(p_descuento/100))
-		equipajeImprescindible.add('Certificado de descuento')
-		return precio
-	}
-}
-
-object goodAirs{
-	const property nombre = "Good Airs"
-	var property equipajeImprescindible = ["Cerveza", "Protector Solar"]
-	var property precio = 1500
-	
-	
-	method aplicarDescuento(p_descuento)
-	{
-		precio = precio - (precio*(p_descuento/100))
-		equipajeImprescindible.add('Certificado de descuento')
-		return precio
-	}
-}
-
-object barrileteCosmico{
-	var cantidadMinimaDestinoImportante = 2000
-	var property destinos = [garlicSea, silverSea, lastToninas, goodAirs]
+class Empresa{
+	const cantidadMinimaDestinoImportante = 2000
+	var property nombre
+	var property destinos = new List()
 	
 	method destinosMasImportantes(){
-		return destinos.filter {x => x.precio() >= cantidadMinimaDestinoImportante}
+		return destinos.filter {destino => destino.precio() >= cantidadMinimaDestinoImportante}
 	}
 	
 	method aplicarDescuento(cantDescuento, unDestino){
 		var destino = self.getDestinoPorNombre(unDestino)
-		var nuevo_precio = self.calcularDescuento(destino.precio(), cantDescuento) 
-		destino.precio(nuevo_precio)
-		destino.equipajeImprescindible().add("Certificado de descuento")
-		
+		destino.aplicarDescuento(cantDescuento)
 	}
 	
-	method aplicarDescuentoDestinos(descuento){
-	    destinos.map({x => x.aplicarDescuento(descuento)})
-	    return "Se han aplicado los descuentos"
+	method aplicarDescuentoDestinos(cantDescuento){
+	    destinos.forEach {destino => destino.aplicarDescuento(cantDescuento)}
 	}
 	
 	method esEmpresaExtrema(){
 		var listaDestinos = self.destinosMasImportantes()
-		return listaDestinos.any {destino => self.destinoTieneVacuna(destino)}
-	}
-	
-	method esDestinoExtremo(destino){ // peligroso == extremo
-		return self.destinoTieneVacuna(destino)
-	}
-	
-	method destinoTieneVacuna(destino){
-		return destino.equipajeImprescindible().any {equipaje => equipaje.contains('Vacuna')}
-	}
-	
-	method calcularDescuento(precio, cantDescuento){
-		const formula = {precio_original, cant_descuento => precio_original - (precio_original * (cant_descuento / 100))}
-		return formula.apply(precio, cantDescuento)
+		return listaDestinos.any {destino => destino.esDestinoPeligroso()}
 	}
 	
 	method mostrarCartaDestinos(){
@@ -103,26 +47,13 @@ object barrileteCosmico{
 	
 }
 
-object pHari {
-	const property nombre = "Pablo Hari"
+class Usuario{
 	const porcentajeKilometraje = 10
-	var empresa = barrileteCosmico
-	var property destinosConocidos = ["Last Toninas", "Good Airs"]
-	var property balanceEnCuenta = 1500
-	var property siguiendo = []
-	
-	method volarDestino(nombreDestino){
-		var mensaje = ""
-		var destino = empresa.getDestinoPorNombre(nombreDestino) 
-		if (self.puedeVolarDestino(destino)){
-			balanceEnCuenta -= destino.precio()
-			self.agregarDestino(nombreDestino)
-			mensaje = "Pudo viajar Correctamente"
-		}else{
-			mensaje = "No cuenta con el saldo suficiente para viajar. Tiene " + balanceEnCuenta + " $ y necesita " + destino.precio() + " $"
-		}
-		return mensaje
-	}
+	var property empresa
+	var property nombre
+	var property destinosConocidos = new List()
+	var property balanceEnCuenta
+	var property siguiendo = new List()
 	
 	method puedeVolarDestino(destino){
 		return balanceEnCuenta >= destino.precio()		
@@ -147,10 +78,103 @@ object pHari {
 		usuario.siguiendo().add(self)
 	}
 	
+	method volarDestino(nombreDestino){
+		var destino = empresa.getDestinoPorNombre(nombreDestino)
+		if (self.puedeVolarDestino(destino)){
+			balanceEnCuenta -= destino.precio()
+			self.agregarDestino(nombreDestino)
+		}
+	}
+	
 	method siguiendo(){
 		// en lugar de retornar la lista entera, retorno los nombres para que sea un print mas amigable
 		// posiblemente haya que cambiarlo en una instancia futura
 		return siguiendo.map {seguidor => seguidor.nombre()}
 	}
+
 }
+
+
+object testDataGenerator{
+	//no tengo la mas palida idea de si esto seria una buena idea pero pinto totalmente
+	
+	method setUpDestino(destino, nombre, equipaje, precio){
+		destino.nombre(nombre)
+		destino.equipajeImprescindible(equipaje)
+		destino.precio(precio)
+	}
+	
+	method setUpUsuario(usuario, nombre, empresa, destinosConocidos, balanceEnCuenta){
+		usuario.nombre(nombre)
+		usuario.empresa(empresa)
+		usuario.destinosConocidos(destinosConocidos)
+		usuario.balanceEnCuenta(balanceEnCuenta)
+	}
+	
+	method setUpEmpresa(empresa, nombre, listaDestinos){
+		empresa.nombre(nombre)
+		empresa.destinos(listaDestinos)
+	}
+	
+	method genGarlicSea(){
+		const garlicSea = new Destino()
+		const nombre = "Garlic's Sea"
+		const equipajeImprescindible = ["Caña de Pescar", "Piloto"]
+		const precio = 2500
+		self.setUpDestino(garlicSea, nombre, equipajeImprescindible, precio)
+		return garlicSea
+	}
+	
+	method genSilverSea(){
+		const silverSea = new Destino()
+		const nombre = "Silver's Sea"
+		const equipajeImprescindible = ["Protector Solar", "Equipo de Buceo"]
+		const precio = 1350
+		self.setUpDestino(silverSea, nombre, equipajeImprescindible, precio)
+		return silverSea
+	}
+	
+	method genLastToninas(){
+		const lastToninas = new Destino()
+		const nombre = "Last Toninas"
+		const equipajeImprescindible = ["Vacuna Gripal", "Vacuna B", "Necronomicon"]
+		const precio = 3500
+		self.setUpDestino(lastToninas, nombre, equipajeImprescindible, precio)
+		return lastToninas
+	}
+	
+	method genGoodAirs(){
+		const goodAirs = new Destino()
+		const nombre = "Good Airs"
+		const equipajeImprescindible = ["Cerveza", "Protector Solar"]
+		const precio = 1500
+		self.setUpDestino(goodAirs, nombre, equipajeImprescindible, precio)
+		return goodAirs
+	}
+	
+	method genBarrileteCosmico(){
+		const barrileteCosmico = new Empresa()
+		const nombre = "Barrilete Cosmico"
+		const garlicSea = self.genGarlicSea()
+		const silverSea = self.genSilverSea()
+		const lastToninas = self.genLastToninas()
+		const goodAirs = self.genGoodAirs()
+		const listaDestinos = [garlicSea, silverSea, lastToninas, goodAirs]
+		self.setUpEmpresa(barrileteCosmico, nombre, listaDestinos)
+		return barrileteCosmico
+	}
+	
+	method genPHari(){
+		const pHari = new Usuario()
+		const nombre = "Pablo Hari"
+		const empresa = self.genBarrileteCosmico()
+		const destinosConocidos = ["Last Toninas", "Good Airs"]
+		const balanceEnCuenta = 1500
+		self.setUpUsuario(pHari, nombre, empresa, destinosConocidos, balanceEnCuenta)
+		return pHari
+	}
+	
+	
+}
+
 
