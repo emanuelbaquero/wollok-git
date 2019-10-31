@@ -1,99 +1,113 @@
 import SistemaBarrileteCosmico.*
 
+
 describe "Tests de SistemaBarrileteCosmico" {
 	
 	test "Destinos mas importantes" {
-		const garlicSea = testDataGenerator.genGarlicSea()
-		const lastToninas = testDataGenerator.genLastToninas()
-		const barrileteCosmico = testDataGenerator.genBarrileteCosmico()
+		var barrileteCosmico = generador.barrileteCosmico()
+		var localidadesEsperadas = [generador.lastToninas(), generador.garlicSea()]
 		
-		var lista_obtenida = barrileteCosmico.destinosMasImportantes()
-		assert.that(lista_obtenida.any {destino => destino.nombre() == garlicSea.nombre()})
-		assert.that(lista_obtenida.any {destino => destino.nombre() == lastToninas.nombre()})
+		var lista_obtenida = barrileteCosmico.localidadesMasImportantes()
+		localidadesEsperadas.forEach{localidad =>
+			assert.that(lista_obtenida.any{localidadObtenida => localidad.nombre() == localidadObtenida.nombre()})
+		}
+		
 	}
 
 	test "El descuento del 10% para Last Toninas es de 3150"{
-		const lastToninas = testDataGenerator.genLastToninas()
+		const barrileteCosmico = generador.barrileteCosmico()
 		const porcentaje_descuento = 10
 		const precio_esperado = 3150 //quizas deberia calcularlo a manopla en vez de hardcodearlo :thinking:
 		const equipaje_esperado = "Certificado de descuento"
 		
-		lastToninas.aplicarDescuento(porcentaje_descuento)
+		barrileteCosmico.aplicarDescuento(porcentaje_descuento, "Last Toninas")
+		var lastToninas = barrileteCosmico.getLocalidadPorNombre("Last Toninas")
 		assert.that(lastToninas.precio() == precio_esperado)
-		assert.that(lastToninas.equipajeImprescindible().any {equipaje => equipaje == equipaje_esperado})
+		assert.that(lastToninas.getEquipaje(equipaje_esperado).size() == 1)
 	}
 	
 	test"25% dto para Last Toninas queda en 2.625 y debe tener en el equipaje un certificado de descuento"{
-		const lastToninas = testDataGenerator.genLastToninas()
-		lastToninas.aplicarDescuento(25) 
-		assert.equals(2625,lastToninas.precio())
-		assert.that(lastToninas.equipajeImprescindible().any {equipaje => equipaje.contains("Certificado de descuento")})
+		const barrileteCosmico = generador.barrileteCosmico()
+		const porcentaje_descuento = 25
+		const precio_esperado = 2625
+		const equipaje_esperado = "Certificado de descuento"
+		
+		barrileteCosmico.aplicarDescuento(porcentaje_descuento, "Last Toninas")
+		var lastToninas = barrileteCosmico.getLocalidadPorNombre("Last Toninas")
+		assert.that(lastToninas.precio() == precio_esperado)
+		assert.notThat(lastToninas.getEquipaje(equipaje_esperado).isEmpty())
 	}
 	
 	
 	test"Silver's Sea no es un Destino Peligroso"{
-		const silverSea = testDataGenerator.genSilverSea()
-		assert.notThat(silverSea.esDestinoPeligroso())
+		const silverSea = generador.silverSea()
+		assert.notThat(silverSea.esLocalidadPeligrosa())
 	}
 	
 	test"15% a todos los Destinos, garlic=2125, silver=1147,5,last=2975,good=1275"{
-		const barrileteCosmico = testDataGenerator.genBarrileteCosmico()
-		barrileteCosmico.aplicarDescuentoDestinos(15)
+		const barrileteCosmico = generador.barrileteCosmico()
+		const equipaje_esperado = "Certificado de descuento"
+		barrileteCosmico.aplicarDescuentoLocalidades(15)
 		// Quizas estos const haya que delegarlos en un get precio por nombre o algo similar
-		const precioGarlicSea = barrileteCosmico.getDestinoPorNombre("Garlic's Sea").precio()
-		const precioSilverSea = barrileteCosmico.getDestinoPorNombre("Silver's Sea").precio()
-		const precioLastToninas = barrileteCosmico.getDestinoPorNombre("Last Toninas").precio()
-		const precioGoodAirs = barrileteCosmico.getDestinoPorNombre("Good Airs").precio()
+		const precioGarlicSea = barrileteCosmico.getLocalidadPorNombre("Garlic's Sea").precio()
+		const precioSilverSea = barrileteCosmico.getLocalidadPorNombre("Silver's Sea").precio()
+		const precioLastToninas = barrileteCosmico.getLocalidadPorNombre("Last Toninas").precio()
+		const precioGoodAirs = barrileteCosmico.getLocalidadPorNombre("Good Airs").precio()
 		assert.equals(2125,precioGarlicSea)
 		assert.equals(1147.5,precioSilverSea)
 		assert.equals(2975,precioLastToninas)
 		assert.equals(1275,precioGoodAirs)
-		assert.that(barrileteCosmico.destinos().all {destino => destino.equipajeImprescindible().contains("Certificado de descuento")})
-
+		barrileteCosmico.localidades().forEach {localidad => 
+			assert.notThat(localidad.getEquipaje(equipaje_esperado).isEmpty())
+		}
 	}
 	
 	test"El destino mas peligroso es Last Toninas"{
-		const garlicSea = testDataGenerator.genGarlicSea()
-		const lastToninas = testDataGenerator.genLastToninas()
-		const silverSea = testDataGenerator.genSilverSea()
-		const goodAirs = testDataGenerator.genGoodAirs()
+		const garlicSea = generador.garlicSea()
+		const lastToninas = generador.lastToninas()
+		const silverSea = generador.silverSea()
+		const goodAirs = generador.goodAirs()
 		
-		assert.notThat(garlicSea.esDestinoPeligroso())
-		assert.notThat(silverSea.esDestinoPeligroso())
-		assert.notThat(goodAirs.esDestinoPeligroso())
-		assert.that(lastToninas.esDestinoPeligroso())
+		assert.notThat(garlicSea.esLocalidadPeligrosa())
+		assert.notThat(silverSea.esLocalidadPeligrosa())
+		assert.notThat(goodAirs.esLocalidadPeligrosa())
+		assert.that(lastToninas.esLocalidadPeligrosa())
 	}
 	
 	test "Las empresa Barrilete Cosmico es una empresa extrema"{
-		const barrileteCosmico = testDataGenerator.genBarrileteCosmico()
+		const barrileteCosmico = generador.barrileteCosmico()
 		assert.that(barrileteCosmico.esEmpresaExtrema());		
 	}
 	
 	test"La carta es Last Toninas, Garlic´s sea, Good Airs y Silver's Sea"{
-		const barrileteCosmico = testDataGenerator.genBarrileteCosmico()
-		var lista_obtenida = barrileteCosmico.mostrarCartaDestinos()
-		assert.that(lista_obtenida.any{destino => destino.contains("Silver's Sea")})
-		assert.that(lista_obtenida.any{destino => destino.contains("Good Airs")})
-		assert.that(lista_obtenida.any{destino => destino.contains("Garlic's Sea")})
-		assert.that(lista_obtenida.any{destino => destino.contains("Last Toninas")})
+		const barrileteCosmico = generador.barrileteCosmico()
+		var lista_obtenida = barrileteCosmico.mostrarCartaLocalidades()
+		assert.that(lista_obtenida.any{localidad => localidad.contains("Silver's Sea")})
+		assert.that(lista_obtenida.any{localidad => localidad.contains("Good Airs")})
+		assert.that(lista_obtenida.any{localidad => localidad.contains("Garlic's Sea")})
+		assert.that(lista_obtenida.any{localidad => localidad.contains("Last Toninas")})
 	}
 	
-	test"PHari tiene 500 km"{
-		const pHari = testDataGenerator.genPHari()
-		assert.equals(500,pHari.getKilometrosRecorridos())
-	}
 	
-	test"pHari puede volar a Silver's Sea y es agregado en su historial"{
-		const pHari = testDataGenerator.genPHari()
-		pHari.volarDestino("Silver's Sea")
-		assert.that(pHari.destinosConocidos().any{dConocidos => dConocidos.contains("Silver's Sea")})
+	test"Un usuario viaja desde Last Toninas a Garlic'Sea"{
+		var localidadOrigen = generador.lastToninas()
+		var localidadDestino = generador.garlicSea()
+		var balance = 40000
+		var unUsuario = generador.unUsuario(localidadOrigen, balance)
+		var viajesRealizadosPreViaje = unUsuario.getViajesRealizados().copy()
+		
+		unUsuario.viajarA(localidadDestino)
+		var nuevosViajes = unUsuario.getViajesRealizados().difference(viajesRealizadosPreViaje).asList() 
+		assert.that(nuevosViajes.size() == 1)  //Deberia ser una lista de un solo elemento ya que solo se realizo un viaje
+		var viajeRealizado = nuevosViajes.head()
+		var balanceEsperado = balance - viajeRealizado.costo()
+		var empresa = unUsuario.empresa()
+				
+		assert.that(viajeRealizado.destino() == localidadDestino) //valido que sea el destino esperado
+		assert.that(viajeRealizado.origen() == localidadOrigen) // valido que sea el origen esperado
+		assert.equals(unUsuario.balance(), balanceEsperado) // valido el balance
+		
+		
 	}
-	
-	test"pHari puede volar a Silver's Sea y en su cuenta le quedaron $150"{
-		const pHari = testDataGenerator.genPHari()
-		pHari.volarDestino("Silver's Sea")
-		assert.that(pHari.destinosConocidos().any{dConocidos => dConocidos.contains("Silver's Sea")})
-		assert.equals(150,pHari.balanceEnCuenta())
-	}
-
 }
+
