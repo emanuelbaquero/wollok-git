@@ -3,7 +3,7 @@ import SistemaBarrileteCosmico.*
 
 describe "Tests de SistemaBarrileteCosmico" {
 	
-	test "Destinos mas importantes" {
+	test "Localidades mas importantes" {
 		var barrileteCosmico = generador.barrileteCosmico()
 		var localidadesEsperadas = [generador.lastToninas(), generador.garlicSea()]
 		
@@ -22,8 +22,8 @@ describe "Tests de SistemaBarrileteCosmico" {
 		
 		barrileteCosmico.aplicarDescuento(porcentaje_descuento, "Last Toninas")
 		var lastToninas = barrileteCosmico.getLocalidadPorNombre("Last Toninas")
-		assert.that(lastToninas.precio() == precio_esperado)
-		assert.that(lastToninas.getEquipaje(equipaje_esperado).size() == 1)
+		assert.equals(lastToninas.precio(), precio_esperado)
+		assert.equals(lastToninas.getEquipaje(equipaje_esperado).size(), 1)
 	}
 	
 	test"25% dto para Last Toninas queda en 2.625 y debe tener en el equipaje un certificado de descuento"{
@@ -34,17 +34,17 @@ describe "Tests de SistemaBarrileteCosmico" {
 		
 		barrileteCosmico.aplicarDescuento(porcentaje_descuento, "Last Toninas")
 		var lastToninas = barrileteCosmico.getLocalidadPorNombre("Last Toninas")
-		assert.that(lastToninas.precio() == precio_esperado)
+		assert.equals(lastToninas.precio(), precio_esperado)
 		assert.notThat(lastToninas.getEquipaje(equipaje_esperado).isEmpty())
 	}
 	
 	
-	test"Silver's Sea no es un Destino Peligroso"{
+	test"Silver's Sea no es una localidad peligrosa"{
 		const silverSea = generador.silverSea()
 		assert.notThat(silverSea.esLocalidadPeligrosa())
 	}
 	
-	test"15% a todos los Destinos, garlic=2125, silver=1147,5,last=2975,good=1275"{
+	test"15% a todas las localidades, garlic=2125, silver=1147,5,last=2975,good=1275"{
 		const barrileteCosmico = generador.barrileteCosmico()
 		const equipaje_esperado = "Certificado de descuento"
 		barrileteCosmico.aplicarDescuentoLocalidades(15)
@@ -62,7 +62,7 @@ describe "Tests de SistemaBarrileteCosmico" {
 		}
 	}
 	
-	test"El destino mas peligroso es Last Toninas"{
+	test"La localidad mas peligrosa es Last Toninas"{
 		const garlicSea = generador.garlicSea()
 		const lastToninas = generador.lastToninas()
 		const silverSea = generador.silverSea()
@@ -89,25 +89,58 @@ describe "Tests de SistemaBarrileteCosmico" {
 	}
 	
 	
+	test "Barrilete Cosmico puede generar un viaje a de Good Airs a Silver's Sea"{
+		var barrileteCosmico = generador.barrileteCosmico()
+		var goodAirs = barrileteCosmico.getLocalidadPorNombre("Good Airs")
+		var silverSea = barrileteCosmico.getLocalidadPorNombre("Silver's Sea")
+		
+		var viaje = barrileteCosmico.prepararViaje(goodAirs, silverSea) 
+		
+		var transporte = barrileteCosmico.getMedioTransporte(viaje.medioTransporte()) //consigo el transporte utilizado
+		var distancia = goodAirs.distanciaA(silverSea) // calculo la distancia
+		var costoEsperado = (transporte.precioPorKm() * distancia) + silverSea.precio()
+		
+		assert.equals(costoEsperado, viaje.costo()) //valido que el costo se calcule correctamente
+		assert.equals(distancia, viaje.distancia()) // valido que la distancia se calcule correctamente
+	}
+	
 	test"Un usuario viaja desde Last Toninas a Garlic'Sea"{
 		var localidadOrigen = generador.lastToninas()
 		var localidadDestino = generador.garlicSea()
 		var balance = 40000
 		var unUsuario = generador.unUsuario(localidadOrigen, balance)
-		var viajesRealizadosPreViaje = unUsuario.getViajesRealizados().copy()
+		
+		//el usuario aun no realizo ningun viaje
+		assert.that(unUsuario.getViajesRealizados().isEmpty())
 		
 		unUsuario.viajarA(localidadDestino)
-		var nuevosViajes = unUsuario.getViajesRealizados().difference(viajesRealizadosPreViaje).asList() 
-		assert.that(nuevosViajes.size() == 1)  //Deberia ser una lista de un solo elemento ya que solo se realizo un viaje
-		var viajeRealizado = nuevosViajes.head()
-		var balanceEsperado = balance - viajeRealizado.costo()
-		var empresa = unUsuario.empresa()
+		var nuevosViajes = unUsuario.getViajesRealizados()
+		var viaje = nuevosViajes.head()
+		var balanceEsperado = balance - viaje.costo()
 				
-		assert.that(viajeRealizado.destino() == localidadDestino) //valido que sea el destino esperado
-		assert.that(viajeRealizado.origen() == localidadOrigen) // valido que sea el origen esperado
+		assert.equals(viaje.destino(), localidadDestino) //valido que sea el destino esperado
+		assert.equals(viaje.origen(), localidadOrigen) // valido que sea el origen esperado
 		assert.equals(unUsuario.balance(), balanceEsperado) // valido el balance
+	}
+	
+	test "Un usuario no puede viajar desde Good Airs a Last Toninas porque no tiene plata"{
+		var goodAirs = generador.goodAirs()
+		var lastToninas = generador.lastToninas()
+		var unUsuario = generador.unUsuario(goodAirs, 250)
 		
-		
+		assert.throwsExceptionWithType(new NoPuedeViajarExcepcion(message = "No cuenta con el balance suficiente para viajar"), 
+			{
+				unUsuario.viajarA(lastToninas)
+			})
+	}
+	
+	test "Un usuario sigue a pHari"{
+		//no es necesario que la localidad origen sea una instancia de Localidad para este caso de prueba
+		var unUsuario = generador.unUsuario("Silver's Sea", 15000) 
+		var pHari = generador.pHari()
+		unUsuario.seguirUsuario(pHari)
+		assert.that(unUsuario.siguiendo().any {seguidor => seguidor == pHari})
+		assert.that(pHari.siguiendo().any {seguidor => seguidor == unUsuario})
 	}
 }
 

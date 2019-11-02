@@ -69,10 +69,10 @@ class Empresa{
 class Usuario{
 	var property empresa
 	const property nombre
-	var viajesRealizados = new Set()
+	var viajesRealizados = new List()
 	var localidadOrigen
 	var balanceEnCuenta
-	var siguiendo = new Set()
+	var siguiendo = new List()
 	
 	method getLocalidadOrigen() = localidadOrigen
 
@@ -90,19 +90,14 @@ class Usuario{
 		localidadOrigen = nuevaLocalidad
 	}
 	
-	method disminuirBalance(disminucion) {
-		// Creeria que esta excepcion sobra ya que por negocio siempre se pregunta si puede viajar primero
-		if(0 > (balanceEnCuenta - disminucion)) throw new Exception() 
-		
+	method disminuirBalance(disminucion) { // no arrojo una excepcion porque por negocio siempre se valida si puede viajar primero
 		balanceEnCuenta -= disminucion
 	}
 	
 	method viajarA(localidaDestino) {
 		var viaje = empresa.prepararViaje(self.getLocalidadOrigen(), localidaDestino)		
-		if(!self.puedeViajar(viaje)) throw new NoPuedeViajarExcepcion(
-			message = "No cuenta con el balance suficiente, necesita " + viaje.costo().toString() + " y tiene " + balanceEnCuenta.toString()
-		)
-		
+		if(!self.puedeViajar(viaje)) throw new NoPuedeViajarExcepcion(message = "No cuenta con el balance suficiente para viajar")
+	
 		self.disminuirBalance(viaje.costo())
 		self.agregarViaje(viaje)
 		self.setLocalidadOrigen(viaje.destino())
@@ -138,6 +133,7 @@ class MedioTransporte {
 }
 
 object generador{
+	
 	method unUsuario(_localidadOrigen, _balance){
 		var empresa = self.barrileteCosmico()
 		var localidadOrigen = _localidadOrigen
