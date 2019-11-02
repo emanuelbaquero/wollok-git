@@ -1,179 +1,226 @@
-class Destino{
-	var property nombre
-	var property equipajeImprescindible = new List()
+class NoPuedeViajarExcepcion inherits Exception {}
+
+class Localidad{
+	const property nombre
+	var equipajeImprescindible = []
 	var property precio
+	var property kilometro
 	
-	method esDestinoPeligroso(){
-		return equipajeImprescindible.any {equipaje => equipaje.contains('Vacuna')}
-	}
+	method getEquipaje(equipaje) = equipajeImprescindible.filter {unEquipaje => unEquipaje == equipaje}
+	
+	method distanciaA(otraLocalidad) = (kilometro - otraLocalidad.kilometro()).abs()
+	
+	method equipajes() = equipajeImprescindible
+	
+	method esLocalidadPeligrosa() = equipajeImprescindible.any {equipaje => equipaje.contains('Vacuna')}
 	
 	method aplicarDescuento(porcentaje){
 		precio -= precio * (porcentaje / 100)
 		equipajeImprescindible.add('Certificado de descuento')
 	}
 	
+	method agregar_equipaje(equipaje){
+		equipajeImprescindible.add(equipaje)
+	} 
+	
 }
 
 class Empresa{
 	const cantidadMinimaDestinoImportante = 2000
-	var property nombre
-	var property destinos = new List()
+	const property nombre
+	var property mediosDeTransporte = new List()
+	var localidades = new List()
 	
-	method destinosMasImportantes(){
-		return destinos.filter {destino => destino.precio() >= cantidadMinimaDestinoImportante}
-	}
+	method localidadesMasImportantes() = localidades.filter {localidad => localidad.precio() >= cantidadMinimaDestinoImportante}
 	
-	method aplicarDescuento(cantDescuento, unDestino){
-		var destino = self.getDestinoPorNombre(unDestino)
-		destino.aplicarDescuento(cantDescuento)
-	}
+	method mostrarCartaLocalidades() = localidades.map {localidad => localidad.nombre()}
 	
-	method aplicarDescuentoDestinos(cantDescuento){
-	    destinos.forEach {destino => destino.aplicarDescuento(cantDescuento)}
+	method localidades() = localidades
+	
+	method getLocalidadPorNombre(nombreLocalidad) = localidades.find {localidad => localidad.nombre() == nombreLocalidad}
+	
+	method getMedioTransporteRandom() = mediosDeTransporte.anyOne()
+	
+	method getMedioTransporte(_medio) = mediosDeTransporte.find {medio => medio == _medio}
+	
+	method aplicarDescuentoLocalidades(cantDescuento){
+		localidades.forEach {localidad => localidad.aplicarDescuento(cantDescuento)}
 	}
 	
 	method esEmpresaExtrema(){
-		var listaDestinos = self.destinosMasImportantes()
-		return listaDestinos.any {destino => destino.esDestinoPeligroso()}
+		var listaLocalidades = self.localidadesMasImportantes()
+		return listaLocalidades.any {localidad => localidad.esLocalidadPeligrosa()}
 	}
 	
-	method mostrarCartaDestinos(){
-		return destinos.map {destino => destino.nombre()}
+	method aplicarDescuento(cantDescuento, unaLocalidad){
+		var localidad = self.getLocalidadPorNombre(unaLocalidad)
+		localidad.aplicarDescuento(cantDescuento)
 	}
 	
-	method getDestinoPorNombre(destino){
-		return destinos.find {x => x.nombre() == destino}
+	method prepararViaje(localidadOrigen, localidadDestino){
+		return new Viaje(
+			origen = localidadOrigen,
+			destino= localidadDestino,
+			medioTransporte = self.getMedioTransporteRandom())
 	}
 	
 }
 
 class Usuario{
-	const porcentajeKilometraje = 10
 	var property empresa
-	var property nombre
-	var property destinosConocidos = new List()
-	var property balanceEnCuenta
-	var property siguiendo = new List()
+	const property nombre
+	var viajesRealizados = new List()
+	var localidadOrigen
+	var balanceEnCuenta
+	var siguiendo = new List()
 	
-	method puedeVolarDestino(destino){
-		return balanceEnCuenta >= destino.precio()		
+	method getLocalidadOrigen() = localidadOrigen
+
+	method getViajesRealizados() = viajesRealizados
+	
+	method siguiendo() = siguiendo
+	
+	method balance() = balanceEnCuenta
+	
+	method puedeViajar(viaje) = balanceEnCuenta >= viaje.costo()
+	
+	method agregarViaje(viaje) {viajesRealizados.add(viaje)}
+	
+	method setLocalidadOrigen(nuevaLocalidad) {
+		localidadOrigen = nuevaLocalidad
 	}
 	
-	method agregarDestino(nombreDestino){
-		destinosConocidos.add(nombreDestino)
+	method disminuirBalance(disminucion) { // no arrojo una excepcion porque por negocio siempre se valida si puede viajar primero
+		balanceEnCuenta -= disminucion
 	}
 	
-	method getKilometrosRecorridos(){
-		return (self.getMontoTotalRecorrido() * porcentajeKilometraje) / 100
+	method viajarA(localidaDestino) {
+		var viaje = empresa.prepararViaje(self.getLocalidadOrigen(), localidaDestino)		
+		if(!self.puedeViajar(viaje)) throw new NoPuedeViajarExcepcion(message = "No cuenta con el balance suficiente para viajar")
+	
+		self.disminuirBalance(viaje.costo())
+		self.agregarViaje(viaje)
+		self.setLocalidadOrigen(viaje.destino())
 	}
 	
-	method getMontoTotalRecorrido(){
-		var lista_precios = []
-		destinosConocidos.forEach {nombreDestino => lista_precios.add(empresa.getDestinoPorNombre(nombreDestino).precio())}
-		return lista_precios.sum()
+	method getKilometrosRecorridos() {
+		var lista_distancias = viajesRealizados.map { viaje => viaje.distancia()}
+		return lista_distancias.sum()
 	}
+
 	
 	method seguirUsuario(usuario){
 		siguiendo.add(usuario)
 		usuario.siguiendo().add(self)
 	}
 	
-	method volarDestino(nombreDestino){
-		var destino = empresa.getDestinoPorNombre(nombreDestino)
-		if (self.puedeVolarDestino(destino)){
-			balanceEnCuenta -= destino.precio()
-			self.agregarDestino(nombreDestino)
-		}
-	}
-	
-	method siguiendo(){
-		// en lugar de retornar la lista entera, retorno los nombres para que sea un print mas amigable
-		// posiblemente haya que cambiarlo en una instancia futura
-		return siguiendo.map {seguidor => seguidor.nombre()}
-	}
-
 }
 
+class Viaje{
+	var property origen
+	var property destino
+	var property medioTransporte
+	
+	method costo() = medioTransporte.precioPorKm() * self.distancia() + destino.precio()
+	
+	method distancia() = origen.distanciaA(destino)
+}
 
-object testDataGenerator{
-	//no tengo la mas palida idea de si esto seria una buena idea pero pinto totalmente
+class MedioTransporte {
+	var property nombre
+	var property precioPorKm
+	var property duracionViaje
+}
+
+object generador{
 	
-	method setUpDestino(destino, nombre, equipaje, precio){
-		destino.nombre(nombre)
-		destino.equipajeImprescindible(equipaje)
-		destino.precio(precio)
+	method unUsuario(_localidadOrigen, _balance){
+		var empresa = self.barrileteCosmico()
+		var localidadOrigen = _localidadOrigen
+		var balance = _balance
+		return new Usuario(nombre = "Un Usuario", 
+						   localidadOrigen = localidadOrigen, 
+						   balanceEnCuenta = balance, 
+						   empresa = empresa
+		)
 	}
 	
-	method setUpUsuario(usuario, nombre, empresa, destinosConocidos, balanceEnCuenta){
-		usuario.nombre(nombre)
-		usuario.empresa(empresa)
-		usuario.destinosConocidos(destinosConocidos)
-		usuario.balanceEnCuenta(balanceEnCuenta)
+	method pHari(){
+		var empresa = self.barrileteCosmico()
+		var localidadOrigen = self.garlicSea()
+		var balance = 15000
+		return new Usuario(nombre = "Un Usuario", 
+						   localidadOrigen = localidadOrigen, 
+						   balanceEnCuenta = balance, 
+						   empresa = empresa
+		)
 	}
 	
-	method setUpEmpresa(empresa, nombre, listaDestinos){
-		empresa.nombre(nombre)
-		empresa.destinos(listaDestinos)
+	method barrileteCosmico(){
+		var nombre = "Barrilete Cosmico"
+		var mediosDeTransporte = self.muchosMediosdeTransporte()
+		var localidades = self.lista_localidades()
+		return new Empresa(
+			nombre = nombre, mediosDeTransporte = mediosDeTransporte, localidades = localidades
+		)
 	}
 	
-	method genGarlicSea(){
-		const garlicSea = new Destino()
-		const nombre = "Garlic's Sea"
-		const equipajeImprescindible = ["Caña de Pescar", "Piloto"]
-		const precio = 2500
-		self.setUpDestino(garlicSea, nombre, equipajeImprescindible, precio)
-		return garlicSea
+	method garlicSea(){
+		var nombre = "Garlic's Sea"
+		var equipaje = ["Caña de Pescar", "Piloto"]
+		var precio = 2500
+		var kilometro = 55
+		return new Localidad(nombre = nombre, precio = precio, 
+			equipajeImprescindible = equipaje, kilometro = kilometro
+		)
+	}
+	method silverSea(){
+		var nombre = "Silver's Sea"
+		var equipaje = ["Protector Solar", "Equipo de Buceo"]
+		var precio = 1350
+		var kilometro = 90
+		return new Localidad(nombre = nombre, precio = precio, 
+			equipajeImprescindible = equipaje, kilometro = kilometro
+		)
+	}
+	method lastToninas(){
+		var nombre = "Last Toninas"
+		var equipaje = ["Vacuna Gripal", "Vacuna B", "Necronomicon"]
+		var precio = 3500
+		var kilometro = 10
+		return new Localidad(nombre = nombre, precio = precio, 
+			equipajeImprescindible = equipaje, kilometro = kilometro
+		)
+	}
+	method goodAirs(){
+		var nombre = "Good Airs"
+		var equipaje = ["Cerveza", "Protector Solar"]
+		var precio = 1500
+		var kilometro = 25
+		return new Localidad(nombre = nombre, precio = precio, 
+			equipajeImprescindible = equipaje, kilometro = kilometro
+		)
 	}
 	
-	method genSilverSea(){
-		const silverSea = new Destino()
-		const nombre = "Silver's Sea"
-		const equipajeImprescindible = ["Protector Solar", "Equipo de Buceo"]
-		const precio = 1350
-		self.setUpDestino(silverSea, nombre, equipajeImprescindible, precio)
-		return silverSea
+	method lista_localidades(){
+		return [self.goodAirs(), self.lastToninas(), self.silverSea(), self.garlicSea()]
 	}
 	
-	method genLastToninas(){
-		const lastToninas = new Destino()
-		const nombre = "Last Toninas"
-		const equipajeImprescindible = ["Vacuna Gripal", "Vacuna B", "Necronomicon"]
-		const precio = 3500
-		self.setUpDestino(lastToninas, nombre, equipajeImprescindible, precio)
-		return lastToninas
+	method muchosMediosdeTransporte(){
+		var cantidad = 5
+		var precioMinimo = 50
+		var precioMaximo = 100
+		var duracionMinimaViaje = 5
+		var duracionMaximaViaje = 30
+		var lista_transportes = []
+		cantidad.times{i =>
+			var precioPorKm = precioMinimo.randomUpTo(precioMaximo);
+			var duracionViaje = duracionMinimaViaje.randomUpTo(duracionMaximaViaje);
+			var nombre = "Transporte " + i.toString();
+			lista_transportes.add(new MedioTransporte(nombre = nombre, precioPorKm = precioPorKm, duracionViaje = duracionViaje));
+		}
+		return lista_transportes
 	}
-	
-	method genGoodAirs(){
-		const goodAirs = new Destino()
-		const nombre = "Good Airs"
-		const equipajeImprescindible = ["Cerveza", "Protector Solar"]
-		const precio = 1500
-		self.setUpDestino(goodAirs, nombre, equipajeImprescindible, precio)
-		return goodAirs
-	}
-	
-	method genBarrileteCosmico(){
-		const barrileteCosmico = new Empresa()
-		const nombre = "Barrilete Cosmico"
-		const garlicSea = self.genGarlicSea()
-		const silverSea = self.genSilverSea()
-		const lastToninas = self.genLastToninas()
-		const goodAirs = self.genGoodAirs()
-		const listaDestinos = [garlicSea, silverSea, lastToninas, goodAirs]
-		self.setUpEmpresa(barrileteCosmico, nombre, listaDestinos)
-		return barrileteCosmico
-	}
-	
-	method genPHari(){
-		const pHari = new Usuario()
-		const nombre = "Pablo Hari"
-		const empresa = self.genBarrileteCosmico()
-		const destinosConocidos = ["Last Toninas", "Good Airs"]
-		const balanceEnCuenta = 1500
-		self.setUpUsuario(pHari, nombre, empresa, destinosConocidos, balanceEnCuenta)
-		return pHari
-	}
-	
 	
 }
 
