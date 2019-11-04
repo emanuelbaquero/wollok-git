@@ -20,21 +20,15 @@ class Beth {
 class Summer {
 	var property amorPadre = 0
 
-	method irAventuraElMiercoles(rick){
-		if (rick.fecha_dia() == "miecoles"){ 
-			self.irAventura(rick)
-		}
-		else{
-
-		}
-	}
-	
 	
 	method irAventura(rick){
-			rick.disminuirDemencia()
-			self.aumentarAmorPadre()	
-	} 
 	
+		if (rick.fecha_dia() == "miecoles"){ 
+			rick.disminuirDemencia()
+			self.aumentarAmorPadre()
+		}
+	
+	} 
 	
 	method aumentarAmorPadre(){
 		amorPadre = amorPadre + 10
@@ -73,15 +67,28 @@ class Rick {
 	}
 }
 
+class PickleRick inherits Rick{
+	nivelDemencia = super.nivelDemencia/2;
+}
+
+class Aventura{
+	var rick;
+	var idAventura;
+
+	method nuevaAventura(alguien){
+		idAventura = idAventura+1;
+		rick = new Rick();
+		rick.alguien.irAventura(rick);
+	}
+}
 
 
 class UniversosParalelos{
 	var property universos = []
-	var property ricks
+	var property aventura
 
 	method otroUniversoParalelo(){
-			ricks = new Rick()
-			universos.add(ricks)
+			aventura = new Aventura()
+			universos.add(aventura)
 	}
 }
-
